@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm C25 KD17</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .question {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #0066ff;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #004ccc;
+        }
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Trắc nghiệm C25 KD17</h1>
+
+<div id="quiz"></div>
+
+<button class="btn" onclick="submitQuiz()">Nộp bài</button>
+
+<div id="result"></div>
+
+<script>
+    const questions = [
+        {
+            question: "Câu 1: Nội dung ví dụ...",
+            answers: ["A. ...", "B. ...", "C. ...", "D. ..."],
+            correct: 1
+        },
+        {
+            question: "Câu 2: Nội dung ví dụ...",
+            answers: ["A. ...", "B. ...", "C. ...", "D. ..."],
+            correct: 3
+        }
+    ];
+
+    const quizContainer = document.getElementById("quiz");
+
+    function loadQuiz() {
+        questions.forEach((q, index) => {
+            const div = document.createElement("div");
+            div.className = "question";
+
+            let html = `<p><strong>${q.question}</strong></p>`;
+
+            q.answers.forEach((a, i) => {
+                html += `
+                    <label>
+                        <input type="radio" name="q${index}" value="${i}">
+                        ${a}
+                    </label><br>
+                `;
+            });
+
+            div.innerHTML = html;
+            quizContainer.appendChild(div);
+        });
+    }
+
+    function submitQuiz() {
+        let score = 0;
+
+        questions.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected && Number(selected.value) === q.correct) {
+                score++;
+            }
+        });
+
+        document.getElementById("result").innerText = 
+            `Bạn được ${score}/${questions.length} câu đúng`;
+    }
+
+    loadQuiz();
+</script>
+
+</body>
+</html>
 
