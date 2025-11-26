@@ -1,110 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trắc nghiệm C25 KD17</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f4f4f4;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .question {
-            background: #fff;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .btn {
-            background: #0066ff;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn:hover {
-            background: #004ccc;
-        }
-        #result {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-            color: green;
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Trắc nghiệm — 50 câu, 60 phút, nhiều đáp án đúng</title>
+<style>
+  :root{
+    --blue:#2563eb;
+    --pink:#ec4899;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --radius:14px;
+    --shadow:0 10px 25px rgba(0,0,0,0.06);
+  }
+  body{
+    font-family:"Inter",system-ui,Segoe UI,Roboto;
+    background:url('https://i.imgur.com/3lP9q4g.png') no-repeat center center/cover;
+    margin:0;padding:22px;
+    color:var(--text);
+  }
+  .wrap{
+    max-width:1150px;margin:0 auto;
+    background:var(--card);
+    padding:26px;border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    animation:fadeIn .6s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  h1{
+    font-size:26px;margin:0 0 10px;
+    background:linear-gradient(90deg,var(--blue),var(--pink));
+    -webkit-background-clip:text;
+    color:transparent;
+    font-weight:800;
+  }
+  h3{margin-top:0;font-size:18px;color:var(--blue)}
+  textarea{
+    width:100%;min-height:160px;padding:12px;border-radius:var(--radius);
+    border:1px solid #dbeafe;font-family:monospace;
+    background:#f8fafc;
+  }
+
+  button{
+    background:var(--blue);color:white;border:0;padding:10px 14px;
+    border-radius:var(--radius);cursor:pointer;font-weight:600;
+    transition:.2s;
+  }
+  button:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(37,99,235,0.25)}
+  button.ghost{
+    background:white;color:var(--blue);
+    border:1px solid #bfdbfe;
+  }
+
+  .panel{
+    background:#f8fafc;
+    padding:16px;border-radius:var(--radius);
+    box-shadow:inset 0 0 0 1px #e2e8f0;
+  }
+
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:16px;margin-top:16px}
+
+  .question{
+    padding:12px;border-radius:var(--radius);
+    background:white;
+    box-shadow:0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom:12px;
+  }
+  .opt{
+    display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;
+    cursor:pointer;transition:.15s;
+  }
+  .opt:hover{background:#f1f5f9}
+  .opt.correct{background:#dcfce7;border:1px solid #86efac}
+  .opt.wrong{background:#fee2e2;border:1px solid #fca5a5}
+
+  #timer{
+    font-weight:800;color:#dc2626;font-size:18px;
+  }
+
+  #preview{
+    background:white;border-radius:var(--radius);
+    padding:10px;border:1px dashed #cbd5e1;
+  }
+</style>
 </head>
 <body>
+<audio id="alarmSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0d2db56905.mp3?filename=alarm-104399.mp3"></audio>
+  <div class="wrap">
+    <h1>Trắc nghiệm — 50 câu, 60 phút, hỗ trợ nhiều đáp án đúng</h1>
+    <div class="small">Đánh dấu đáp án đúng bằng dấu <code>*</code> ở cuối option. Ví dụ:<br><code>Question text\nA. Option A*\nB. Option B*\nC. Option C\nD. Option D</code></div>
 
-<h1>Trắc nghiệm C25 KD17</h1>
+    <div class="grid">
+      <div class="panel">
+        <h3>1) Nhập hàng loạt (mẫu)</h3>
+        <textarea id="bulk" placeholder="Dán câu hỏi theo mẫu, mỗi câu cách nhau 1 dòng trống..."></textarea>
+        <div class="controls">
+          <button id="parse">Parse & Xem trước</button>
+          <button id="addAll" class="ghost">Thêm vào kho</button>
+          <button id="clearBulk" class="ghost">Xóa</button>
+          <button id="sample" class="ghost">Tải mẫu</button>
+        </div>
+        <div id="parseInfo" class="small" style="margin-top:8px"></div>
+        <div id="preview" style="margin-top:8px;max-height:240px;overflow:auto;border-radius:6px;padding:6px;border:1px dashed #e6f0ff;background:#fbfeff"></div>
+      </div>
 
-<div id="quiz"></div>
+      <div class="panel">
+        <h3>2) Thi — Cấu hình</h3>
+        <div class="small">Tổng số câu trong kho: <span id="totalCount">0</span></div>
+        <div style="margin-top:8px">
+          <label for="numQ">Số câu làm (mặc định 50): </label>
+          <input id="numQ" type="number" value="50" min="1" max="500" style="width:100px;margin-left:8px" />
+        </div>
+        <div style="margin-top:8px">
+          <label for="timeMin">Thời gian (phút, mặc định 60): </label>
+          <input id="timeMin" type="number" value="60" min="1" style="width:100px;margin-left:8px" />
+        </div>
+        <div class="controls" style="margin-top:10px">
+          <button id="start">Bắt đầu làm bài</button>
+          <button id="reset" class="ghost">Reset</button>
+          <button id="export" class="ghost">Xuất JSON kho</button>
+        </div>
+        <div style="margin-top:12px">Thời gian còn lại: <span id="timer">--:--</span></div>
+      </div>
+    </div>
 
-<button class="btn" onclick="submitQuiz()">Nộp bài</button>
-
-<div id="result"></div>
+    <div id="quizArea" style="margin-top:12px"></div>
+    <div id="resultArea" style="margin-top:12px"></div>
+    <footer style="margin-top:12px" class="small">Ghi chú: Điểm tính theo số câu đúng hoàn toàn (chọn đủ đáp án đúng và không chọn đáp án sai). Có thể điều chỉnh để cho điểm từng đáp án nếu cần.</footer>
+  </div>
 
 <script>
-    const questions = [
-        {
-            question: "Câu 1: Nội dung ví dụ...",
-            answers: ["A. ...", "B. ...", "C. ...", "D. ..."],
-            correct: 1
-        },
-        {
-            question: "Câu 2: Nội dung ví dụ...",
-            answers: ["A. ...", "B. ...", "C. ...", "D. ..."],
-            correct: 3
-        }
-    ];
+// Data store
+let store = JSON.parse(localStorage.getItem('multi_store') || '[]');
+function save(){ localStorage.setItem('multi_store', JSON.stringify(store)); renderCounts(); }
+function renderCounts(){ document.getElementById('totalCount').textContent = store.length; }
 
-    const quizContainer = document.getElementById("quiz");
-
-    function loadQuiz() {
-        questions.forEach((q, index) => {
-            const div = document.createElement("div");
-            div.className = "question";
-
-            let html = `<p><strong>${q.question}</strong></p>`;
-
-            q.answers.forEach((a, i) => {
-                html += `
-                    <label>
-                        <input type="radio" name="q${index}" value="${i}">
-                        ${a}
-                    </label><br>
-                `;
-            });
-
-            div.innerHTML = html;
-            quizContainer.appendChild(div);
-        });
+// Parser: mỗi block cách nhau 1 dòng trống. Line1 = question, tiếp theo 4 lines bắt đầu A. B. C. D.
+function parseBulk(text){
+  const blocks = text.split(/\n{2,}/).map(b=>b.trim()).filter(Boolean);
+  const parsed = [];
+  const errors = [];
+  blocks.forEach((blk, idx)=>{
+    const lines = blk.split(/\n/).map(l=>l.trim()).filter(Boolean);
+    if(lines.length < 5){ errors.push(`Block ${idx+1}: cần ít nhất 1 dòng câu + 4 option`); return; }
+    const q = lines[0];
+    const opts = {A:'',B:'',C:'',D:''};
+    const corrects = [];
+    for(let i=1;i<lines.length;i++){
+      const m = lines[i].match(/^([A-Da-d])\s*[\.|\)]?\s*(.*)$/);
+      if(m){
+        const k = m[1].toUpperCase(); let v = m[2];
+        let isCorrect = false;
+        if(v.endsWith('*')){ isCorrect = true; v = v.slice(0,-1); }
+        v = v.trim(); opts[k] = v; if(isCorrect) corrects.push(k);
+      }
     }
+    if(!opts.A || !opts.B || !opts.C || !opts.D){ errors.push(`Block ${idx+1}: option thiếu (A-D)`); return; }
+    if(corrects.length===0){ errors.push(`Block ${idx+1}: không tìm thấy đáp án đúng (thêm '*' vào option đúng)`); return; }
+    parsed.push({ text:q, A:opts.A, B:opts.B, C:opts.C, D:opts.D, correct: corrects });
+  });
+  return { parsed, errors };
+}
 
-    function submitQuiz() {
-        let score = 0;
+// UI hooks
+document.getElementById('parse').onclick = ()=>{
+  const txt = document.getElementById('bulk').value;
+  if(!txt.trim()){ alert('Vui lòng nhập nội dung'); return; }
+  const res = parseBulk(txt);
+  const prev = document.getElementById('preview'); prev.innerHTML='';
+  if(res.errors.length){ prev.innerHTML += '<div style="color:#b45309">Lỗi:</div><div class="small">'+res.errors.join('<br>')+'</div>'; }
+  if(res.parsed.length){ prev.innerHTML += `<div style="font-weight:700">Đã phân tích: ${res.parsed.length} câu</div>`;
+    res.parsed.forEach((q,i)=>{
+      const d = document.createElement('div'); d.style.padding='6px'; d.style.borderBottom='1px solid #eef'; d.innerHTML = `<div style="font-weight:600">${i+1}. ${escape(q.text)}</div><div class="small">A:${escape(q.A)} | B:${escape(q.B)} | C:${escape(q.C)} | D:${escape(q.D)} — Đ: ${q.correct.join(',')}</div>`;
+      prev.appendChild(d);
+    });
+    window._lastParsed = res.parsed;
+  } else { window._lastParsed = []; }
+};
 
-        questions.forEach((q, index) => {
-            const selected = document.querySelector(`input[name="q${index}"]:checked`);
-            if (selected && Number(selected.value) === q.correct) {
-                score++;
-            }
-        });
+document.getElementById('addAll').onclick = ()=>{
+  const parsed = window._lastParsed || [];
+  if(parsed.length===0){ alert('Chưa parse được câu nào.'); return; }
+  store = store.concat(parsed);
+  save(); alert(`Đã thêm ${parsed.length} câu vào kho.`);
+  window._lastParsed = [];
+  document.getElementById('preview').innerHTML=''; document.getElementById('bulk').value='';
+};
 
-        document.getElementById("result").innerText = 
-            `Bạn được ${score}/${questions.length} câu đúng`;
-    }
+document.getElementById('clearBulk').onclick = ()=>{ document.getElementById('bulk').value=''; document.getElementById('preview').innerHTML=''; window._lastParsed = []; };
+document.getElementById('sample').onclick = ()=>{
+  const s = `What are prime numbers under 6?\nA. 2*\nB. 3*\nC. 4\nD. 5*\n\nWhich are vowels?\nA. A*\nB. B\nC. E*\nD. F`;
+  document.getElementById('bulk').value = s; document.getElementById('parse').click();
+};
 
-    loadQuiz();
+// Export
+document.getElementById('export').onclick = ()=>{
+  const data = JSON.stringify(store, null, 2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='questions_multi.json'; a.click(); URL.revokeObjectURL(url);
+};
+
+// Start quiz
+let currentQuiz = [];
+let userAns = [];
+let timerId = null;
+let remaining = 0;
+
+document.getElementById('start').onclick = ()=>{
+  if(store.length===0){ alert('Kho trống, thêm câu trước.'); return; }
+  const n = parseInt(document.getElementById('numQ').value) || 50;
+  const t = parseInt(document.getElementById('timeMin').value) || 60;
+  // pick n random
+  const pool = [...store];
+  pool.sort(()=>Math.random()-0.5);
+  currentQuiz = pool.slice(0, Math.min(n, pool.length));
+  userAns = currentQuiz.map(()=>[]);
+  startTimer(t*60);
+  renderQuiz();
+};
+
+function startTimer(seconds){
+  clearInterval(timerId);
+  remaining = seconds;
+  updateTimerDisplay();
+  timerId = setInterval(()=>{
+    remaining--; updateTimerDisplay(); if(remaining<0){ clearInterval(timerId); autoSubmit(); }
+  },1000);
+}
+function updateTimerDisplay(){
+  const el = document.getElementById('timer');
+  if(remaining<0){ el.textContent = '00:00'; return; }
+  const m = Math.floor(remaining/60); const s = remaining%60;
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function renderQuiz(){
+  const wrap = document.getElementById('quizArea'); wrap.innerHTML='';
+  currentQuiz.forEach((q,i)=>{
+    const box = document.createElement('div'); box.className='question';
+    const title = document.createElement('div'); title.style.fontWeight='700'; title.textContent = `Câu ${i+1}. ${q.text}`;
+    box.appendChild(title);
+    ['A','B','C','D'].forEach(k=>{
+      const opt = document.createElement('label'); opt.className='opt'; opt.id=`q${i}_${k}`;
+      const inp = document.createElement('input'); inp.type='checkbox'; inp.name = `q${i}`; inp.value = k; inp.onchange = ()=>{
+        const checked = Array.from(document.querySelectorAll(`input[name=q${i}]:checked`)).map(x=>x.value);
+        userAns[i] = checked;
+      };
+      const span = document.createElement('div'); span.textContent = `${k}. ${q[k]}`;
+      opt.appendChild(inp); opt.appendChild(span); box.appendChild(opt);
+    });
+    wrap.appendChild(box);
+  });
+  const btn = document.createElement('div'); btn.style.marginTop='10px'; btn.innerHTML = `<button id='submitBtn'>Nộp bài</button>`;
+  wrap.appendChild(btn);
+  document.getElementById('submitBtn').onclick = submitQuiz;
+}
+
+function arraysEqual(a,b){ if(a.length!==b.length) return false; const A=[...a].sort(); const B=[...b].sort(); return A.every((v,i)=>v===B[i]); }
+
+function submitQuiz(){ clearInterval(timerId); grade(); }
+function autoSubmit(){ document.getElementById('alarmSound').play(); document.getElementById('resultArea').innerHTML = '<div style="font-weight:700;color:#b91c1c">Hết giờ — tự động nộp bài</div>'; grade(); }(){ document.getElementById('resultArea').innerHTML = '<div style="font-weight:700;color:#b91c1c">Hết giờ — tự động nộp bài</div>'; grade(); }
+
+function grade(){
+  let score=0;
+  currentQuiz.forEach((q,i)=>{
+    const user = userAns[i] || [];
+    const correct = q.correct || [];
+    const box = document.getElementById('quizArea');
+    // mark options
+    ['A','B','C','D'].forEach(k=>{
+      const el = document.getElementById(`q${i}_${k}`);
+      el.classList.remove('correct','wrong');
+      const checked = user.includes(k);
+      const should = correct.includes(k);
+      if(should) el.classList.add('correct');
+      if(checked && !should) el.classList.add('wrong');
+    });
+    if(arraysEqual(user, correct)) score++;
+  });
+  document.getElementById('resultArea').innerHTML = `<div style="font-weight:700">Kết quả: ${score} / ${currentQuiz.length}</div>`;
+}
+
+// Helpers
+function escape(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// init
+renderCounts();
+
+// allow reset
+document.getElementById('reset').onclick = ()=>{ if(!confirm('Reset bài thi hiện tại và timer?')) return; clearInterval(timerId); remaining=0; updateTimerDisplay(); document.getElementById('quizArea').innerHTML=''; document.getElementById('resultArea').innerHTML=''; };
+
 </script>
-
 </body>
 </html>
-
