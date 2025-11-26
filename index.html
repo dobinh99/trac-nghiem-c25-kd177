@@ -1,31 +1,182 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trắc nghiệm trực tuyến – Mùa Xuân</title>
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="assets/style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trắc nghiệm trực tuyến</title>
 </head>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trắc nghiệm C25 KD17</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: url('dragon-spring.jpg') center/cover no-repeat fixed;
+      color: #222;
+    }
 
+    .overlay {
+      background: rgba(255, 255, 255, 0.85);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #b30000;
+      font-size: 30px;
+    }
+
+    .question {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .answers label {
+      display: block;
+      padding: 6px 0;
+    }
+
+    button {
+      padding: 12px 22px;
+      background: #ff6600;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background: #cc5200;
+    }
+
+    #timer {
+      font-size: 22px;
+      font-weight: bold;
+      color: #d40000;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
 <body>
-    <div class="app-container">
-        <h1 class="title">🎉 Thi Trắc Nghiệm – Chủ Đề Mùa Xuân 🎉</h1>
-
-        <div id="timer" class="timer">⏳ 60:00</div>
-
-        <div id="question-container"></div>
-
-        <button id="submitBtn" class="submit-btn">Nộp bài</button>
-
-        <div id="result" class="result"></div>
+  <div class="overlay">
+    <div class="container">
+      <h1>Trắc nghiệm C25 KD17</h1>
+      <div id="timer">Thời gian: 60:00</div>
+      <form id="quizForm"></form>
+      <button onclick="submitQuiz()">Nộp bài</button>
     </div>
+  </div>
 
-    <!-- Âm báo -->
-    <audio id="timeoutSound" src="assets/sounds/timeout.mp3" preload="auto"></audio>
+  <audio id="timeoutSound">
+    <source src="timeout.mp3" type="audio/mpeg" />
+  </audio>
 
-    <!-- JS -->
-    <script src="assets/script.js"></script>
+  <script>
+    // =======================
+    // DANH SÁCH CÂU HỎI
+    // Mỗi đáp án đúng có dấu *
+    // =======================
+
+    const questions = [
+      {
+        q: "Câu hỏi mẫu 1?",
+        answers: ["A", "B*", "C", "D*"]
+      },
+      {
+        q: "Câu hỏi mẫu 2?",
+        answers: ["A*", "B", "C*", "D"]
+      }
+      // ... thêm câu hỏi ở đây
+    ];
+
+    // Random chọn 50 câu
+    function pickRandom50(list) {
+      const shuffled = [...list].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, 50);
+    }
+
+    const selectedQuestions = pickRandom50(questions);
+
+    const quizForm = document.getElementById("quizForm");
+
+    // Render câu hỏi
+    selectedQuestions.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <div class='question'>${index + 1}. ${item.q}</div>
+        <div class='answers'>
+          ${item.answers
+            .map(
+              (ans, i) => `
+              <label>
+                <input type='checkbox' name='q${index}' value='${ans.replace("*", "")}'>
+                ${ans.replace("*", "")}
+              </label>`
+            )
+            .join("")}
+        </div>
+      `;
+      quizForm.appendChild(div);
+    });
+
+    // Chấm điểm
+    function submitQuiz() {
+      let score = 0;
+      selectedQuestions.forEach((item, index) => {
+        const correct = item.answers.filter(a => a.includes("*"))
+          .map(a => a.replace("*", ""));
+
+        const chosen = [...document.querySelectorAll(`input[name='q${index}']:checked`)]
+          .map(el => el.value);
+
+        if (JSON.stringify(correct.sort()) === JSON.stringify(chosen.sort())) {
+          score += 0.2; // 50 câu = 10 điểm
+        }
+      });
+
+      alert("Bạn đạt: " + score.toFixed(2) + " điểm");
+    }
+
+    // ==========================
+    // HẸN GIỜ 60 PHÚT
+    // ==========================
+
+    let time = 60 * 60; // 60 phút
+
+    const timer = document.getElementById("timer");
+
+    const countdown = setInterval(() => {
+      let m = Math.floor(time / 60);
+      let s = time % 60;
+
+      timer.textContent = `Thời gian: ${m}:${s < 10 ? "0" : ""}${s}`;
+
+      if (time <= 0) {
+        clearInterval(countdown);
+        document.getElementById("timeoutSound").play();
+        submitQuiz();
+      }
+
+      time--;
+    }, 1000);
+  </script>
 </body>
 </html>
+
